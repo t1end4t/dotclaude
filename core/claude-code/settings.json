@@ -36,8 +36,7 @@
   "permissions": {
     "allow": [
       "Bash(opencode:*)",
-      "Skill(opencode)",
-      "Skill(local-llm-call)"
+      "Skill(opencode)"
     ],
     "deny": [
       "Read",
