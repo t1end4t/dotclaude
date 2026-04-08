@@ -1,0 +1,13 @@
+[pack]
+name = "scientific-writing"
+description = "Scientific writing, citations, literature review, peer review, research grants"
+version = "1.0.0"
+
+[claude-code]
+skills = "claude-code/skills"
+
+[opencode]
+agents = "opencode/agents"
+
+[codex]
+skills = "codex/skills"

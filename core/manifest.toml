@@ -1,0 +1,22 @@
+[pack]
+name = "core"
+description = "Layer 0: Self-modification sandbox — commands, agents, hooks for managing your AI coding tools"
+version = "1.0.0"
+
+[claude-code]
+commands = "claude-code/commands"
+agents = "claude-code/agents"
+hooks = "claude-code/hooks"
+settings = "claude-code/settings.json"
+
+[opencode]
+agents = "opencode/agents"
+commands = "opencode/commands"
+config = "opencode/opencode.json"
+agents_md = "opencode/AGENTS.md"
+
+[codex]
+skills = "codex/skills"
+
+[extras]
+environment_d = "environment.d"
