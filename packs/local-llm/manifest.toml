@@ -1,0 +1,13 @@
+[pack]
+name = "local-llm"
+description = "Route lightweight tasks to local llama-server to save API tokens"
+version = "1.0.0"
+
+[claude-code]
+skills = "claude-code/skills"
+
+[opencode]
+agents = "opencode/agents"
+
+[codex]
+skills = "codex/skills"
