@@ -1,4 +1,7 @@
 {
+  "sandbox": {
+    "enabled": true
+  },
   "enabledPlugins": {
     "claude-md-management@claude-plugins-official": true,
     "claude-mem@thedotmack": true
@@ -34,10 +37,7 @@
     ]
   },
   "permissions": {
-    "allow": [
-      "Bash(opencode:*)",
-      "Skill(opencode)"
-    ],
+    "allow": [],
     "deny": [
       "Read",
       "Edit",
@@ -45,5 +45,12 @@
       "Glob",
       "Grep"
     ]
+  },
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:20128/v1",
+    "ANTHROPIC_AUTH_TOKEN": "sk_9router",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "planning",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "coding",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "simple"
   }
 }

@@ -71,7 +71,8 @@ install_core() {
     copy_dir  "$core/claude-code/commands"  "$CLAUDE_HOME/commands"  "~/.claude/commands/"
     copy_dir  "$core/claude-code/agents"    "$CLAUDE_HOME/agents"    "~/.claude/agents/"
     copy_dir  "$core/claude-code/hooks"     "$CLAUDE_HOME/hooks"     "~/.claude/hooks/"
-    copy_file "$core/claude-code/settings.json" "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
+    merge_json "$core/claude-code/settings.json" "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
+    copy_file "$core/claude-code/CLAUDE.md" "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
     # Make hooks executable
     chmod +x "$CLAUDE_HOME/hooks/"*.sh 2>/dev/null || true
   fi

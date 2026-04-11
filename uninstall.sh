@@ -51,6 +51,8 @@ uninstall_core() {
       remove_if_exists "$CLAUDE_HOME/hooks/$(basename "$f")" "~/.claude/hooks/$(basename "$f")"
     done
   fi
+  remove_if_exists "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
+  remove_if_exists "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
 
   # OpenCode
   if [ -d "$core/opencode/agents" ]; then
@@ -66,6 +68,8 @@ uninstall_core() {
     done
   fi
 
+  remove_if_exists "$OPENCODE_HOME/AGENTS.md" "~/.config/opencode/AGENTS.md"
+  remove_if_exists "$OPENCODE_HOME/opencode.json" "~/.config/opencode/opencode.json"
   remove_if_exists "$CLAUDE_HOME/claude-code-guide-path" "~/.claude/claude-code-guide-path"
   echo ""
 }
