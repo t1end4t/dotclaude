@@ -20,8 +20,7 @@ core/           Layer 0 — base config installed with `--core`
   environment.d/              Copied to ~/.config/environment.d/ (skipped if dest exists)
 
 packs/          Opt-in domain packs installed with `--pack=NAME`
-  local-llm/ infra/ data-science/ scientific-writing/ document-tools/ specialized/
-  Each pack has its own manifest.toml and a claude-code/skills/ directory.
+  <pack>/       Each pack has its own manifest.toml and a claude-code/skills/ directory.
 
 guide/          Reference docs, tutorials, and patterns — NOT installed as config.
                 install.sh only records its path in ~/.claude/claude-code-guide-path.
