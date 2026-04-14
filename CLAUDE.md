@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-`dotclaude` is **not an application** — it is a personal distribution of configuration, skills, agents, commands, and hooks for three AI coding tools: **Claude Code**, **OpenCode**, and **Codex**. The `install.sh` script copies files from this repo into `~/.claude/`, `~/.config/opencode/`, `~/.codex/`, and `~/.config/environment.d/`. Editing this repo means editing a source-of-truth that gets materialized into those home directories on install.
+`dotclaude` is **not an application** — it is a personal distribution of configuration, skills, agents, commands, and hooks for **Claude Code**. The `install.sh` script copies files from this repo into `~/.claude/` and `~/.config/environment.d/`. Editing this repo means editing a source-of-truth that gets materialized into those home directories on install.
 
 The philosophical framing lives in `BLUEPRINT.md` (a layered AI-OS vision) and condensed tips live in `best-practice.md`. Read them before making non-trivial structural changes.
 
@@ -14,19 +14,14 @@ The philosophical framing lives in `BLUEPRINT.md` (a layered AI-OS vision) and c
 core/           Layer 0 — base config installed with `--core`
   manifest.toml               Declares what core installs
   claude-code/
-    settings.json             Claude Code harness config (sandbox, permissions, hooks, plugins)
+    settings.json             Harness config (sandbox, permissions, hooks, plugins)
     CLAUDE.md                 Global behavioral rules for Claude Code
-    commands/ agents/ hooks/  Installed to ~/.claude/{commands,agents,hooks}/
-  opencode/
-    opencode.json             Merged into ~/.config/opencode/opencode.json via `jq`
-    agents/ commands/ AGENTS.md
-  codex/skills/               Installed to ~/.codex/skills/
+    hooks/                    Installed to ~/.claude/hooks/
   environment.d/              Copied to ~/.config/environment.d/ (skipped if dest exists)
 
 packs/          Opt-in domain packs installed with `--pack=NAME`
   local-llm/ infra/ data-science/ scientific-writing/ document-tools/ specialized/
-  Each pack has its own manifest.toml and mirrors the core layout
-  (claude-code/skills, opencode/agents, codex/skills).
+  Each pack has its own manifest.toml and a claude-code/skills/ directory.
 
 guide/          Reference docs, tutorials, and patterns — NOT installed as config.
                 install.sh only records its path in ~/.claude/claude-code-guide-path.
@@ -49,14 +44,13 @@ best-practice.md  Concept table + tips for prompts, plans, agents, skills, comma
 ./uninstall.sh ...                              # Same flags, reverses install
 ```
 
-There is no build step, no test suite, no linter. "Testing a change" means running `./install.sh --pack=<name>` against a local environment and exercising the installed skill/agent/command in Claude Code or OpenCode.
+There is no build step, no test suite, no linter. "Testing a change" means running `./install.sh --pack=<name>` against a local environment and exercising the installed skill/agent/command in Claude Code.
 
 ## How install.sh works (things to know before editing it)
 
 - **Copies, does not symlink** — edits to the repo do not propagate until you re-run `install.sh`.
-- **JSON files are merged with `jq -s '.[0] * .[1]'`** in `merge_json()` (install.sh:47-58), so downstream changes to `~/.config/opencode/opencode.json` survive re-installs. Plain files (like `settings.json`) are overwritten via `copy_file()`.
 - **Hooks are chmod +x'd** after install — new hook scripts must be shell-executable.
-- **Packs install skills by directory** (`packs/<pack>/claude-code/skills/<skill>/`), and **each skill directory must contain a `SKILL.md`** or `install_pack()` silently skips it (install.sh:141-151). This is the single most common reason a new skill "doesn't install."
+- **Packs install skills by directory** (`packs/<pack>/claude-code/skills/<skill>/`), and **each skill directory must contain a `SKILL.md`** or `install_pack()` silently skips it. This is the single most common reason a new skill "doesn't install."
 - **`environment.d` files are skipped if the destination already exists** (never overwritten), unlike everything else.
 - `install.sh` writes `$SCRIPT_DIR/guide` to `~/.claude/claude-code-guide-path` so other tools can find the guide docs.
 
@@ -71,16 +65,10 @@ description = "Route lightweight tasks to local llama-server to save API tokens"
 version = "1.0.0"
 
 [claude-code]
-skills = "claude-code/skills"     # Only include sections the pack actually provides
-
-[opencode]
-agents = "opencode/agents"
-
-[codex]
-skills = "codex/skills"
+skills = "claude-code/skills"
 ```
 
-Note: `install.sh` **does not actually parse the manifest** beyond grepping `description` for `--list` output. Installation is driven by directory conventions (`claude-code/skills/`, `opencode/agents/`, etc.), not manifest declarations. The manifest is documentation for humans. If you add a new target, you must teach `install_pack()` about it — updating the manifest alone is not enough.
+Note: `install.sh` **does not actually parse the manifest** beyond grepping `description` for `--list` output. Installation is driven by directory conventions (`claude-code/skills/`), not manifest declarations. The manifest is documentation for humans.
 
 ## Where to put what
 
@@ -88,10 +76,9 @@ Note: `install.sh` **does not actually parse the manifest** beyond grepping `des
 | ----------------------------------- | ----------------------------------------------------------- |
 | Global Claude Code behavior rules   | `core/claude-code/CLAUDE.md`                                |
 | Harness / permissions / hooks / MCP | `core/claude-code/settings.json`                            |
-| OpenCode MCP servers or perms       | `core/opencode/opencode.json`                               |
 | A new general-purpose skill         | `core/claude-code/skills/<name>/SKILL.md` *or* a pack       |
-| A domain-specific skill/agent       | `packs/<pack>/claude-code/skills/<name>/SKILL.md`           |
-| A new pack                          | `packs/<name>/{manifest.toml,claude-code/,opencode/,codex/}`|
+| A domain-specific skill             | `packs/<pack>/claude-code/skills/<name>/SKILL.md`          |
+| A new pack                          | `packs/<name>/{manifest.toml,claude-code/skills/}`          |
 | Shell env vars for the whole system | `core/environment.d/<file>.sh`                              |
 
 Prefer adding to an existing pack over creating a new one. A new pack should represent a cohesive domain (like `scientific-writing`), not a single skill.

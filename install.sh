@@ -14,8 +14,6 @@ RESET="\033[0m"
 
 # ── Target directories ─────────────────────────────────────────────
 CLAUDE_HOME="$HOME/.claude"
-OPENCODE_HOME="$HOME/.config/opencode"
-CODEX_HOME="$HOME/.codex"
 
 COUNT=0
 
@@ -68,28 +66,11 @@ install_core() {
   # Claude Code
   if [ -d "$core/claude-code" ]; then
     echo -e "  ${CYAN}claude-code${RESET}"
-    copy_dir  "$core/claude-code/commands"  "$CLAUDE_HOME/commands"  "~/.claude/commands/"
-    copy_dir  "$core/claude-code/agents"    "$CLAUDE_HOME/agents"    "~/.claude/agents/"
     copy_dir  "$core/claude-code/hooks"     "$CLAUDE_HOME/hooks"     "~/.claude/hooks/"
     merge_json "$core/claude-code/settings.json" "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
     copy_file "$core/claude-code/CLAUDE.md" "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
     # Make hooks executable
     chmod +x "$CLAUDE_HOME/hooks/"*.sh 2>/dev/null || true
-  fi
-
-  # OpenCode
-  if [ -d "$core/opencode" ]; then
-    echo -e "  ${CYAN}opencode${RESET}"
-    copy_dir  "$core/opencode/agents"    "$OPENCODE_HOME/agents"    "~/.config/opencode/agents/"
-    copy_dir  "$core/opencode/commands"  "$OPENCODE_HOME/commands"  "~/.config/opencode/commands/"
-    copy_file "$core/opencode/AGENTS.md" "$OPENCODE_HOME/AGENTS.md" "~/.config/opencode/AGENTS.md"
-    merge_json "$core/opencode/opencode.json" "$OPENCODE_HOME/opencode.json" "~/.config/opencode/opencode.json"
-  fi
-
-  # Codex
-  if [ -d "$core/codex/skills" ]; then
-    echo -e "  ${CYAN}codex${RESET}"
-    copy_dir "$core/codex/skills" "$CODEX_HOME/skills" "~/.codex/skills/"
   fi
 
   # Environment
@@ -153,35 +134,6 @@ install_pack() {
     done
   fi
 
-  # OpenCode agents
-  if [ -d "$pack_dir/opencode/agents" ]; then
-    local has_agents=false
-    for f in "$pack_dir/opencode/agents"/*; do [ -e "$f" ] && has_agents=true && break; done
-    if $has_agents; then
-      echo -e "  ${CYAN}opencode${RESET}"
-      copy_dir "$pack_dir/opencode/agents" "$OPENCODE_HOME/agents" "~/.config/opencode/agents/"
-    fi
-  fi
-
-  # OpenCode commands
-  if [ -d "$pack_dir/opencode/commands" ]; then
-    local has_cmds=false
-    for f in "$pack_dir/opencode/commands"/*; do [ -e "$f" ] && has_cmds=true && break; done
-    if $has_cmds; then
-      copy_dir "$pack_dir/opencode/commands" "$OPENCODE_HOME/commands" "~/.config/opencode/commands/"
-    fi
-  fi
-
-  # Codex skills
-  if [ -d "$pack_dir/codex/skills" ]; then
-    local has_skills=false
-    for f in "$pack_dir/codex/skills"/*; do [ -e "$f" ] && has_skills=true && break; done
-    if $has_skills; then
-      echo -e "  ${CYAN}codex${RESET}"
-      copy_dir "$pack_dir/codex/skills" "$CODEX_HOME/skills" "~/.codex/skills/"
-    fi
-  fi
-
   echo ""
 }
 
@@ -205,7 +157,7 @@ list_packs() {
 
 # ── Usage ───────────────────────────────────────────────────────────
 usage() {
-  echo -e "${BOLD}dotclaude${RESET} — installable packs for AI coding tools"
+  echo -e "${BOLD}dotclaude${RESET} — installable packs for Claude Code"
   echo ""
   echo "Usage:"
   echo "  ./install.sh --core                   Install Layer 0 (self-modification sandbox)"
@@ -214,7 +166,7 @@ usage() {
   echo "  ./install.sh --all                    Install core + all packs"
   echo "  ./install.sh --list                   List available packs"
   echo ""
-  echo "Targets: claude-code (~/.claude), opencode (~/.config/opencode), codex (~/.codex)"
+  echo "Target: claude-code (~/.claude)"
   echo ""
 }
 

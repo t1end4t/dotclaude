@@ -12,8 +12,6 @@ DIM="\033[2m"
 RESET="\033[0m"
 
 CLAUDE_HOME="$HOME/.claude"
-OPENCODE_HOME="$HOME/.config/opencode"
-CODEX_HOME="$HOME/.codex"
 
 COUNT=0
 
@@ -32,45 +30,18 @@ uninstall_core() {
   echo -e "${BOLD}Uninstalling core...${RESET}"
   echo ""
 
-  # Claude Code
-  if [ -d "$core/claude-code/commands" ]; then
-    for f in "$core/claude-code/commands"/*.md; do
-      [ -f "$f" ] || continue
-      remove_if_exists "$CLAUDE_HOME/commands/$(basename "$f")" "~/.claude/commands/$(basename "$f")"
-    done
-  fi
-  if [ -d "$core/claude-code/agents" ]; then
-    for f in "$core/claude-code/agents"/*.md; do
-      [ -f "$f" ] || continue
-      remove_if_exists "$CLAUDE_HOME/agents/$(basename "$f")" "~/.claude/agents/$(basename "$f")"
-    done
-  fi
+  # Claude Code hooks
   if [ -d "$core/claude-code/hooks" ]; then
     for f in "$core/claude-code/hooks"/*; do
       [ -f "$f" ] || continue
       remove_if_exists "$CLAUDE_HOME/hooks/$(basename "$f")" "~/.claude/hooks/$(basename "$f")"
     done
   fi
+
   remove_if_exists "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
   remove_if_exists "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
-
-  # OpenCode
-  if [ -d "$core/opencode/agents" ]; then
-    for f in "$core/opencode/agents"/*.md; do
-      [ -f "$f" ] || continue
-      remove_if_exists "$OPENCODE_HOME/agents/$(basename "$f")" "~/.config/opencode/agents/$(basename "$f")"
-    done
-  fi
-  if [ -d "$core/opencode/commands" ]; then
-    for f in "$core/opencode/commands"/*.md; do
-      [ -f "$f" ] || continue
-      remove_if_exists "$OPENCODE_HOME/commands/$(basename "$f")" "~/.config/opencode/commands/$(basename "$f")"
-    done
-  fi
-
-  remove_if_exists "$OPENCODE_HOME/AGENTS.md" "~/.config/opencode/AGENTS.md"
-  remove_if_exists "$OPENCODE_HOME/opencode.json" "~/.config/opencode/opencode.json"
   remove_if_exists "$CLAUDE_HOME/claude-code-guide-path" "~/.claude/claude-code-guide-path"
+
   echo ""
 }
 
@@ -93,15 +64,6 @@ uninstall_pack() {
       [ -d "$skill_dir" ] || continue
       local skill_name=$(basename "$skill_dir")
       remove_if_exists "$CLAUDE_HOME/skills/$skill_name" "~/.claude/skills/$skill_name/"
-    done
-  fi
-
-  # Codex skills
-  if [ -d "$pack_dir/codex/skills" ]; then
-    for skill_dir in "$pack_dir/codex/skills"/*/; do
-      [ -d "$skill_dir" ] || continue
-      local skill_name=$(basename "$skill_dir")
-      remove_if_exists "$CODEX_HOME/skills/$skill_name" "~/.codex/skills/$skill_name/"
     done
   fi
 

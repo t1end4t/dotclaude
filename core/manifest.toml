@@ -4,19 +4,8 @@ description = "Layer 0: Self-modification sandbox — commands, agents, hooks fo
 version = "1.0.0"
 
 [claude-code]
-commands = "claude-code/commands"
-agents = "claude-code/agents"
-hooks = "claude-code/hooks"
 settings = "claude-code/settings.json"
-
-[opencode]
-agents = "opencode/agents"
-commands = "opencode/commands"
-config = "opencode/opencode.json"
-agents_md = "opencode/AGENTS.md"
-
-[codex]
-skills = "codex/skills"
+hooks = "claude-code/hooks"
 
 [extras]
 environment_d = "environment.d"

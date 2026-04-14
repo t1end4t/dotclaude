@@ -32,7 +32,7 @@
 - Always start with plan mode (`shift+tab` to cycle, or `/plan`). Pour energy into the plan so Claude can 1-shot the implementation.
 - Start with a minimal spec and ask Claude to interview you using the `AskUserQuestion` tool, then open a new session to execute the spec.
 - Always make a phase-wise gated plan, with each phase having multiple tests (unit, automation, integration).
-- Spin up a second Claude to review your plan as a staff engineer. Use cross-model review (e.g. Codex) for extra signal.
+- Spin up a second Claude to review your plan as a staff engineer.
 - Write detailed specs, reduce ambiguity before handing work off — the more specific you are, the better the output.
 - Prototype > PRD — build 20–30 versions instead of writing specs; the cost of building is low so take many shots.
 - The moment something goes sideways, switch back to plan mode and re-plan. Don't keep pushing forward.
