@@ -71,6 +71,19 @@ install_core() {
     copy_file "$core/claude-code/CLAUDE.md" "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
     # Make hooks executable
     chmod +x "$CLAUDE_HOME/hooks/"*.sh 2>/dev/null || true
+
+    # Core skills
+    if [ -d "$core/claude-code/skills" ]; then
+      mkdir -p "$CLAUDE_HOME/skills"
+      for skill_dir in "$core/claude-code/skills"/*/; do
+        [ -f "$skill_dir/SKILL.md" ] || continue
+        local skill_name=$(basename "$skill_dir")
+        rm -rf "$CLAUDE_HOME/skills/$skill_name"
+        cp -r "$skill_dir" "$CLAUDE_HOME/skills/$skill_name"
+        echo -e "  ✅  ${GREEN}~/.claude/skills/$skill_name/${RESET}"
+        COUNT=$((COUNT + 1))
+      done
+    fi
   fi
 
   # Environment

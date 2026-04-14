@@ -42,6 +42,15 @@ uninstall_core() {
   remove_if_exists "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
   remove_if_exists "$CLAUDE_HOME/claude-code-guide-path" "~/.claude/claude-code-guide-path"
 
+  # Claude Code core skills
+  if [ -d "$core/claude-code/skills" ]; then
+    for skill_dir in "$core/claude-code/skills"/*/; do
+      [ -d "$skill_dir" ] || continue
+      local skill_name=$(basename "$skill_dir")
+      remove_if_exists "$CLAUDE_HOME/skills/$skill_name" "~/.claude/skills/$skill_name/"
+    done
+  fi
+
   echo ""
 }
 
