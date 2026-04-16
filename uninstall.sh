@@ -42,6 +42,15 @@ uninstall_core() {
   remove_if_exists "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
   remove_if_exists "$CLAUDE_HOME/claude-code-guide-path" "~/.claude/claude-code-guide-path"
 
+  # External submodule path pointers
+  if [ -d "$SCRIPT_DIR/external" ]; then
+    for ext_dir in "$SCRIPT_DIR/external"/*/; do
+      [ -d "$ext_dir" ] || continue
+      local ext_name=$(basename "$ext_dir")
+      remove_if_exists "$CLAUDE_HOME/${ext_name}-path" "~/.claude/${ext_name}-path"
+    done
+  fi
+
   # Claude Code core skills
   if [ -d "$core/claude-code/skills" ]; then
     for skill_dir in "$core/claude-code/skills"/*/; do

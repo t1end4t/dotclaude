@@ -1,7 +1,0 @@
-[pack]
-name = "document-tools"
-description = "PDF, DOCX, PPTX, XLSX, LaTeX, Markdown-Mermaid, scientific slides and posters"
-version = "1.0.0"
-
-[claude-code]
-skills = "claude-code/skills"

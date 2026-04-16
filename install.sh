@@ -124,6 +124,17 @@ install_core() {
     COUNT=$((COUNT + 1))
   fi
 
+  # External submodule path pointers (read-only references, not installed)
+  if [ -d "$SCRIPT_DIR/external" ]; then
+    for ext_dir in "$SCRIPT_DIR/external"/*/; do
+      [ -d "$ext_dir" ] || continue
+      local ext_name=$(basename "$ext_dir")
+      echo "$ext_dir" > "$CLAUDE_HOME/${ext_name}-path"
+      echo -e "  ✅  ${GREEN}~/.claude/${ext_name}-path${RESET}"
+      COUNT=$((COUNT + 1))
+    done
+  fi
+
   echo ""
 }
 
@@ -151,6 +162,7 @@ install_pack() {
 
   # Skills (use pack:skill naming so invoke is /pack:skill not /pack/skill)
   if [ -d "$pack_dir/claude-code/skills" ]; then
+    mkdir -p "$CLAUDE_HOME/skills"
     for skill_dir in "$pack_dir/claude-code/skills"/*/; do
       [ -d "$skill_dir" ] || continue
       local skill_name=$(basename "$skill_dir")

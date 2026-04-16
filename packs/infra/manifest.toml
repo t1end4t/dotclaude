@@ -1,7 +1,0 @@
-[pack]
-name = "infra"
-description = "Infrastructure utilities — Modal, Perplexity search, resource management, web tools"
-version = "1.0.0"
-
-[claude-code]
-skills = "claude-code/skills"

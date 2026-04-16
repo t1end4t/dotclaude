@@ -1,7 +1,0 @@
-[pack]
-name = "specialized"
-description = "Specialized domains — consciousness council, what-if oracle"
-version = "1.0.0"
-
-[claude-code]
-skills = "claude-code/skills"

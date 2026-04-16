@@ -1,7 +1,0 @@
-[pack]
-name = "data-science"
-description = "Machine learning, statistics, visualization, data processing"
-version = "1.0.0"
-
-[claude-code]
-skills = "claude-code/skills"
