@@ -45,7 +45,21 @@ merge_json() {
   [ -f "$src" ] || return 0
   mkdir -p "$(dirname "$dst")"
   if [ -f "$dst" ] && command -v jq &>/dev/null; then
-    merged=$(jq -s '.[0] * .[1]' "$dst" "$src")
+    # Merge JSON objects, concatenating .hooks arrays per event type
+    # (default jq * replaces arrays; we need hooks to accumulate)
+    # Deduplicate by .command field so re-installing doesn't create duplicates
+    merged=$(jq -s '
+      .[0] as $dst | .[1] as $src |
+      ($dst * $src) |
+      .hooks = (
+        ($dst.hooks // {}) as $dh | ($src.hooks // {}) as $sh |
+        (($dh | keys) + ($sh | keys)) | unique |
+        map(. as $k | {
+          key: $k,
+          value: ((($dh[$k] // []) + ($sh[$k] // [])) | unique_by(.hooks[].command? // .type?))
+        }) | from_entries
+      )
+    ' "$dst" "$src")
     echo "$merged" > "$dst"
     echo -e "  ✅  ${GREEN}${label}${RESET} ${DIM}(merged)${RESET}"
   else
@@ -133,18 +147,31 @@ install_pack() {
   [ -n "$desc" ] && echo -e "  ${DIM}$desc${RESET}"
   echo ""
 
-  # Claude Code skills
+  echo -e "  ${CYAN}claude-code${RESET}"
+
+  # Skills (use pack:skill naming so invoke is /pack:skill not /pack/skill)
   if [ -d "$pack_dir/claude-code/skills" ]; then
-    echo -e "  ${CYAN}claude-code${RESET}"
     for skill_dir in "$pack_dir/claude-code/skills"/*/; do
       [ -d "$skill_dir" ] || continue
       local skill_name=$(basename "$skill_dir")
       [ -f "$skill_dir/SKILL.md" ] || continue
-      rm -rf "$CLAUDE_HOME/skills/$skill_name"
-      cp -r "$skill_dir" "$CLAUDE_HOME/skills/$skill_name"
-      echo -e "  ✅  ${GREEN}~/.claude/skills/$skill_name/${RESET}"
+      local dest="$CLAUDE_HOME/skills/${pack_name}:${skill_name}"
+      rm -rf "$dest"
+      cp -r "$skill_dir" "$dest"
+      echo -e "  ✅  ${GREEN}~/.claude/skills/${pack_name}:${skill_name}/${RESET}"
       COUNT=$((COUNT + 1))
     done
+  fi
+
+  # Hooks
+  if [ -d "$pack_dir/claude-code/hooks" ]; then
+    copy_dir "$pack_dir/claude-code/hooks" "$CLAUDE_HOME/hooks" "~/.claude/hooks/"
+    chmod +x "$CLAUDE_HOME/hooks/"*.sh 2>/dev/null || true
+  fi
+
+  # Settings (merge hooks array entries)
+  if [ -f "$pack_dir/claude-code/settings.json" ]; then
+    merge_json "$pack_dir/claude-code/settings.json" "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
   fi
 
   echo ""

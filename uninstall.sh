@@ -67,12 +67,12 @@ uninstall_pack() {
   echo -e "${BOLD}Uninstalling pack: ${CYAN}$pack_name${RESET}"
   echo ""
 
-  # Claude Code skills
+  # Claude Code skills (match pack:skill naming from install)
   if [ -d "$pack_dir/claude-code/skills" ]; then
     for skill_dir in "$pack_dir/claude-code/skills"/*/; do
       [ -d "$skill_dir" ] || continue
       local skill_name=$(basename "$skill_dir")
-      remove_if_exists "$CLAUDE_HOME/skills/$skill_name" "~/.claude/skills/$skill_name/"
+      remove_if_exists "$CLAUDE_HOME/skills/${pack_name}:${skill_name}" "~/.claude/skills/${pack_name}:${skill_name}/"
     done
   fi
 
