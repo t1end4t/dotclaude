@@ -1,0 +1,8 @@
+[pack]
+name = "daily-protocol"
+description = "Daily researcher protocol — morning context reconstruction and EOD synthesis hooks"
+version = "1.0.0"
+
+[claude-code]
+hooks = "claude-code/hooks"
+settings = "claude-code/settings.json"
