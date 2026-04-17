@@ -51,6 +51,16 @@ uninstall_core() {
     done
   fi
 
+  # Environment files
+  if [ -d "$core/environment.d" ]; then
+    local env_dst="$HOME/.config/environment.d"
+    for f in "$core/environment.d"/*; do
+      [ -f "$f" ] || continue
+      local fname=$(basename "$f")
+      remove_if_exists "$env_dst/$fname" "~/.config/environment.d/$fname"
+    done
+  fi
+
   # Claude Code core skills
   if [ -d "$core/claude-code/skills" ]; then
     for skill_dir in "$core/claude-code/skills"/*/; do
@@ -85,6 +95,28 @@ uninstall_pack() {
     done
   fi
 
+  # Claude Code hooks
+  if [ -d "$pack_dir/claude-code/hooks" ]; then
+    for f in "$pack_dir/claude-code/hooks"/*; do
+      [ -f "$f" ] || continue
+      remove_if_exists "$CLAUDE_HOME/hooks/$(basename "$f")" "~/.claude/hooks/$(basename "$f")"
+    done
+  fi
+
+  echo ""
+}
+
+# ── Uninstall MCP servers ──────────────────────────────────────────
+uninstall_mcp() {
+  echo -e "${BOLD}Uninstalling MCP servers...${RESET}"
+  echo ""
+  for server in memory filesystem fetch; do
+    if claude mcp get "$server" &>/dev/null 2>&1; then
+      claude mcp remove "$server" -s user
+      echo -e "  🗑  ${RED}mcp/$server${RESET}"
+      COUNT=$((COUNT + 1))
+    fi
+  done
   echo ""
 }
 
@@ -94,8 +126,9 @@ usage() {
   echo ""
   echo "Usage:"
   echo "  ./uninstall.sh --core                   Uninstall Layer 0"
+  echo "  ./uninstall.sh --mcp                    Uninstall MCP servers"
   echo "  ./uninstall.sh --pack=NAME              Uninstall a specific pack"
-  echo "  ./uninstall.sh --all                    Uninstall core + all packs"
+  echo "  ./uninstall.sh --all                    Uninstall core + all packs + MCP servers"
   echo ""
 }
 
@@ -106,12 +139,14 @@ fi
 
 DO_CORE=false
 DO_ALL=false
+DO_MCP=false
 PACKS=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --core)     DO_CORE=true ;;
     --all)      DO_ALL=true ;;
+    --mcp)      DO_MCP=true ;;
     --pack=*)   PACKS+=("${1#--pack=}") ;;
     -h|--help)  usage; exit 0 ;;
     *)          echo -e "${RED}Unknown option: $1${RESET}"; usage; exit 1 ;;
@@ -127,8 +162,11 @@ if $DO_ALL; then
     [ -d "$pack_dir" ] || continue
     uninstall_pack "$(basename "$pack_dir")"
   done
+  uninstall_mcp
 elif $DO_CORE; then
   uninstall_core
+elif $DO_MCP; then
+  uninstall_mcp
 fi
 
 for pack in "${PACKS[@]}"; do

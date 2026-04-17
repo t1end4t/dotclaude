@@ -189,6 +189,19 @@ install_pack() {
   echo ""
 }
 
+# ── Install MCP servers ────────────────────────────────────────────
+install_mcp() {
+  local mcp_script="$SCRIPT_DIR/core/mcp.sh"
+  if [ ! -f "$mcp_script" ]; then
+    echo -e "  ${RED}core/mcp.sh not found${RESET}"
+    return 1
+  fi
+  echo -e "${BOLD}Installing MCP servers...${RESET}"
+  echo ""
+  bash "$mcp_script"
+  echo ""
+}
+
 # ── List available packs ───────────────────────────────────────────
 list_packs() {
   echo -e "${BOLD}Available packs:${RESET}"
@@ -213,9 +226,10 @@ usage() {
   echo ""
   echo "Usage:"
   echo "  ./install.sh --core                   Install Layer 0 (self-modification sandbox)"
+  echo "  ./install.sh --mcp                    Install MCP servers (fetch, memory, filesystem)"
   echo "  ./install.sh --pack=NAME              Install a specific pack"
   echo "  ./install.sh --pack=NAME --pack=NAME  Install multiple packs"
-  echo "  ./install.sh --all                    Install core + all packs"
+  echo "  ./install.sh --all                    Install core + all packs + MCP servers"
   echo "  ./install.sh --list                   List available packs"
   echo ""
   echo "Target: claude-code (~/.claude)"
@@ -230,6 +244,7 @@ fi
 
 DO_CORE=false
 DO_ALL=false
+DO_MCP=false
 PACKS=()
 
 while [ $# -gt 0 ]; do
@@ -239,6 +254,9 @@ while [ $# -gt 0 ]; do
       ;;
     --all)
       DO_ALL=true
+      ;;
+    --mcp)
+      DO_MCP=true
       ;;
     --list)
       list_packs
@@ -269,8 +287,11 @@ if $DO_ALL; then
     [ -d "$pack_dir" ] || continue
     install_pack "$(basename "$pack_dir")"
   done
+  install_mcp
 elif $DO_CORE; then
   install_core
+elif $DO_MCP; then
+  install_mcp
 fi
 
 for pack in "${PACKS[@]}"; do
