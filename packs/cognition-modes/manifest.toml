@@ -1,0 +1,7 @@
+[pack]
+name = "cognition-modes"
+description = "Thinking-partner modes (think/draft/do) with explicit identity, refusals, and friction against AI helpfulness-drift"
+version = "1.0.0"
+
+[claude-code]
+skills = "claude-code/skills"

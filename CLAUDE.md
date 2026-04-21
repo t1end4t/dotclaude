@@ -82,6 +82,12 @@ Note: `install.sh` **does not actually parse the manifest** beyond grepping `des
 
 Prefer adding to an existing pack over creating a new one. A new pack should represent a cohesive domain (like `scientific-writing`), not a single skill.
 
+## The cognition-modes pack
+
+`packs/cognition-modes/` provides three skills (`/cognition-modes:think`, `/cognition-modes:draft`, `/cognition-modes:do`) that act as explicit mode-switches for tool-for-thought behavior. Each SKILL.md inlines a compact identity block so the skill works in any project-repo, not just in `~/second-brain/`.
+
+The companion `SECOND-BRAIN-CLAUDE.md` in the pack directory is a per-repo CLAUDE.md template for `~/second-brain/` — it makes tool-for-thought the ambient default without a skill invocation. It is **not** installed by `install.sh`; copy it to `~/second-brain/CLAUDE.md` manually.
+
 ## Conventions worth following
 
 - **Skills are directories, not single files.** A `SKILL.md` is required; `references/`, `scripts/`, and `examples/` subdirectories are conventional. See `best-practice.md` for the full pattern.
