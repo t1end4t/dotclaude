@@ -1,7 +1,0 @@
-[pack]
-name = "cognition"
-description = "Layer 2 — skills that intensify the tool-for-thought default posture"
-version = "1.0.0"
-
-[claude-code]
-skills = "claude-code/skills"
