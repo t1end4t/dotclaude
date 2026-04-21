@@ -1,5 +1,5 @@
 ---
-name: think
+name: cognition-modes:think
 description: Pure tool-for-thought mode. Refuses to produce artifacts — only asks sharpening questions, surfaces patterns, and helps articulate what you actually believe. Invoke when you want help thinking, not help producing.
 ---
 

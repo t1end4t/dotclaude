@@ -1,5 +1,5 @@
 ---
-name: do
+name: cognition-modes:do
 description: Full assistant mode. Invoke when you want the task done, not thought through. No reflective questions, no challenges — just produce.
 ---
 

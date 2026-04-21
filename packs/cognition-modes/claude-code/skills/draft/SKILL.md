@@ -1,5 +1,5 @@
 ---
-name: draft
+name: cognition-modes:draft
 description: Produce artifacts, but challenge first. Requires an articulated purpose before producing, and a named failure mode for high-stakes work. Invoke when you want something written but thought through before it exists.
 ---
 

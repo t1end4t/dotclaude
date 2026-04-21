@@ -18,6 +18,7 @@ core/           Layer 0 — base config installed with `--core`
     CLAUDE.md                 Global behavioral rules for Claude Code
     hooks/                    Installed to ~/.claude/hooks/
   environment.d/              Copied to ~/.config/environment.d/ (skipped if dest exists)
+  rtk.sh                      Installs RTK binary + hooks the PreToolUse hook into Claude Code
 
 packs/          Opt-in domain packs installed with `--pack=NAME`
   <pack>/       Each pack has its own manifest.toml and a claude-code/skills/ directory.
@@ -37,9 +38,11 @@ best-practice.md  Concept table + tips for prompts, plans, agents, skills, comma
 ```bash
 ./install.sh --list                             # Show available packs and file counts
 ./install.sh --core                             # Install only core (Layer 0)
+./install.sh --rtk                              # Install RTK token optimizer + Claude Code hook
+./install.sh --mcp                              # Install MCP servers (fetch, context-mode)
 ./install.sh --pack=local-llm                   # Install a single pack
 ./install.sh --pack=infra --pack=data-science   # Multiple packs in one invocation
-./install.sh --all                              # Core + every pack
+./install.sh --all                              # Core + every pack + MCP + RTK
 ./uninstall.sh ...                              # Same flags, reverses install
 ```
 
@@ -75,6 +78,7 @@ Note: `install.sh` **does not actually parse the manifest** beyond grepping `des
 | ----------------------------------- | ----------------------------------------------------------- |
 | Global Claude Code behavior rules   | `core/claude-code/CLAUDE.md`                                |
 | Harness / permissions / hooks / MCP | `core/claude-code/settings.json`                            |
+| RTK token optimizer setup           | `core/rtk.sh` (binary install + `rtk init -g`)              |
 | A new general-purpose skill         | `core/claude-code/skills/<name>/SKILL.md` *or* a pack       |
 | A domain-specific skill             | `packs/<pack>/claude-code/skills/<name>/SKILL.md`          |
 | A new pack                          | `packs/<name>/{manifest.toml,claude-code/skills/}`          |
@@ -87,6 +91,12 @@ Prefer adding to an existing pack over creating a new one. A new pack should rep
 `packs/cognition-modes/` provides three skills (`/cognition-modes:think`, `/cognition-modes:draft`, `/cognition-modes:do`) that act as explicit mode-switches for tool-for-thought behavior. Each SKILL.md inlines a compact identity block so the skill works in any project-repo, not just in `~/second-brain/`.
 
 The companion `SECOND-BRAIN-CLAUDE.md` in the pack directory is a per-repo CLAUDE.md template for `~/second-brain/` — it makes tool-for-thought the ambient default without a skill invocation. It is **not** installed by `install.sh`; copy it to `~/second-brain/CLAUDE.md` manually.
+
+## Session workflow
+
+On session start, read `../../second-brain/1-Projects/dev-sandbox/dotclaude/journal.md`. Present the first unchecked Todo item along with any relevant Decisions context, and ask if the user wants to proceed.
+
+On session end, update the same journal: check off completed todos, update status if it changed, log any non-obvious decisions, and add open questions or new ideas to the journal section.
 
 ## Conventions worth following
 

@@ -106,11 +106,26 @@ uninstall_pack() {
   echo ""
 }
 
+# ── Uninstall RTK ────────────────────────────────────────────────────
+uninstall_rtk() {
+  echo -e "${BOLD}Uninstalling RTK hook...${RESET}"
+  echo ""
+  # Remove the PreToolUse rtk hook from settings.json
+  if [ -f "$CLAUDE_HOME/settings.json" ] && command -v jq &>/dev/null; then
+    cleaned=$(jq 'if .hooks.PreToolUse then .hooks.PreToolUse = [.hooks.PreToolUse[] | select(.hooks? | all(.command? // .type? | startswith("rtk") | not))] | if .hooks.PreToolUse | length == 0 then del(.hooks.PreToolUse) else . end else . end' "$CLAUDE_HOME/settings.json")
+    echo "$cleaned" > "$CLAUDE_HOME/settings.json"
+    echo -e "  🗑  ${RED}rtk PreToolUse hook${RESET}"
+    COUNT=$((COUNT + 1))
+  fi
+  echo -e "  ${DIM}Note: rtk binary not removed (managed by rtk's own installer)${RESET}"
+  echo ""
+}
+
 # ── Uninstall MCP servers ──────────────────────────────────────────
 uninstall_mcp() {
   echo -e "${BOLD}Uninstalling MCP servers...${RESET}"
   echo ""
-  for server in memory filesystem fetch; do
+  for server in fetch context-mode; do
     if claude mcp get "$server" &>/dev/null 2>&1; then
       claude mcp remove "$server" -s user
       echo -e "  🗑  ${RED}mcp/$server${RESET}"
@@ -126,6 +141,7 @@ usage() {
   echo ""
   echo "Usage:"
   echo "  ./uninstall.sh --core                   Uninstall Layer 0"
+  echo "  ./uninstall.sh --rtk                    Uninstall RTK hook from Claude Code"
   echo "  ./uninstall.sh --mcp                    Uninstall MCP servers"
   echo "  ./uninstall.sh --pack=NAME              Uninstall a specific pack"
   echo "  ./uninstall.sh --all                    Uninstall core + all packs + MCP servers"
@@ -140,6 +156,7 @@ fi
 DO_CORE=false
 DO_ALL=false
 DO_MCP=false
+DO_RTK=false
 PACKS=()
 
 while [ $# -gt 0 ]; do
@@ -147,6 +164,7 @@ while [ $# -gt 0 ]; do
     --core)     DO_CORE=true ;;
     --all)      DO_ALL=true ;;
     --mcp)      DO_MCP=true ;;
+    --rtk)      DO_RTK=true ;;
     --pack=*)   PACKS+=("${1#--pack=}") ;;
     -h|--help)  usage; exit 0 ;;
     *)          echo -e "${RED}Unknown option: $1${RESET}"; usage; exit 1 ;;
@@ -163,10 +181,13 @@ if $DO_ALL; then
     uninstall_pack "$(basename "$pack_dir")"
   done
   uninstall_mcp
+  uninstall_rtk
 elif $DO_CORE; then
   uninstall_core
 elif $DO_MCP; then
   uninstall_mcp
+elif $DO_RTK; then
+  uninstall_rtk
 fi
 
 for pack in "${PACKS[@]}"; do

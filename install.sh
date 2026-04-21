@@ -83,6 +83,7 @@ install_core() {
     copy_dir  "$core/claude-code/hooks"     "$CLAUDE_HOME/hooks"     "~/.claude/hooks/"
     merge_json "$core/claude-code/settings.json" "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
     copy_file "$core/claude-code/CLAUDE.md" "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
+    copy_file "$core/claude-code/CLAUDE-TOKEN-EFFICIENT.md" "$CLAUDE_HOME/CLAUDE-TOKEN-EFFICIENT.md" "~/.claude/CLAUDE-TOKEN-EFFICIENT.md"
     # Make hooks executable
     chmod +x "$CLAUDE_HOME/hooks/"*.sh 2>/dev/null || true
 
@@ -189,6 +190,19 @@ install_pack() {
   echo ""
 }
 
+# ── Install RTK ────────────────────────────────────────────────────
+install_rtk() {
+  local rtk_script="$SCRIPT_DIR/core/rtk.sh"
+  if [ ! -f "$rtk_script" ]; then
+    echo -e "  ${RED}core/rtk.sh not found${RESET}"
+    return 1
+  fi
+  echo -e "${BOLD}Setting up RTK (token optimizer)...${RESET}"
+  echo ""
+  bash "$rtk_script"
+  echo ""
+}
+
 # ── Install MCP servers ────────────────────────────────────────────
 install_mcp() {
   local mcp_script="$SCRIPT_DIR/core/mcp.sh"
@@ -226,6 +240,7 @@ usage() {
   echo ""
   echo "Usage:"
   echo "  ./install.sh --core                   Install Layer 0 (self-modification sandbox)"
+  echo "  ./install.sh --rtk                    Install RTK token optimizer + Claude Code hook"
   echo "  ./install.sh --mcp                    Install MCP servers (fetch, memory, filesystem)"
   echo "  ./install.sh --pack=NAME              Install a specific pack"
   echo "  ./install.sh --pack=NAME --pack=NAME  Install multiple packs"
@@ -245,6 +260,7 @@ fi
 DO_CORE=false
 DO_ALL=false
 DO_MCP=false
+DO_RTK=false
 PACKS=()
 
 while [ $# -gt 0 ]; do
@@ -257,6 +273,9 @@ while [ $# -gt 0 ]; do
       ;;
     --mcp)
       DO_MCP=true
+      ;;
+    --rtk)
+      DO_RTK=true
       ;;
     --list)
       list_packs
@@ -288,10 +307,13 @@ if $DO_ALL; then
     install_pack "$(basename "$pack_dir")"
   done
   install_mcp
+  install_rtk
 elif $DO_CORE; then
   install_core
 elif $DO_MCP; then
   install_mcp
+elif $DO_RTK; then
+  install_rtk
 fi
 
 for pack in "${PACKS[@]}"; do
