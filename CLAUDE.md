@@ -13,18 +13,16 @@ The philosophical framing lives in `BLUEPRINT.md` (a layered AI-OS vision) and c
 ```
 core/           Layer 0 — base config installed with `--core`
   manifest.toml               Declares what core installs
-  claude-code/
-    settings.json             Harness config (sandbox, permissions, hooks, plugins)
-    CLAUDE.md                 Global behavioral rules for Claude Code
-    hooks/                    Installed to ~/.claude/hooks/
+  settings.json             Harness config (sandbox, permissions, hooks, plugins)
+  CLAUDE.md                 Global behavioral rules for Claude Code
+  hooks/                    Installed to ~/.claude/hooks/
   environment.d/              Copied to ~/.config/environment.d/ (skipped if dest exists)
-  rtk.sh                      Installs RTK binary + hooks the PreToolUse hook into Claude Code
 
 packs/          Opt-in domain packs installed with `--pack=NAME`
-  <pack>/       Each pack has its own manifest.toml and a claude-code/skills/ directory.
+  <pack>/       Each pack has its own manifest.toml and a skills/ directory.
 
 guide/          Reference docs, tutorials, and patterns — NOT installed as config.
-                install.sh only records its path in ~/.claude/claude-code-guide-path.
+                install.sh only records its path in ~/.claude/guide-path.
                 guide/CLAUDE.md is a subagent reference, not a project-level CLAUDE.md.
 
 install.sh      The entire "build system" (no Make/just/npm).
@@ -38,11 +36,9 @@ best-practice.md  Concept table + tips for prompts, plans, agents, skills, comma
 ```bash
 ./install.sh --list                             # Show available packs and file counts
 ./install.sh --core                             # Install only core (Layer 0)
-./install.sh --rtk                              # Install RTK token optimizer + Claude Code hook
 ./install.sh --mcp                              # Install MCP servers (fetch, context-mode)
 ./install.sh --pack=local-llm                   # Install a single pack
 ./install.sh --pack=infra --pack=data-science   # Multiple packs in one invocation
-./install.sh --all                              # Core + every pack + MCP + RTK
 ./uninstall.sh ...                              # Same flags, reverses install
 ```
 
@@ -52,9 +48,9 @@ There is no build step, no test suite, no linter. "Testing a change" means runni
 
 - **Copies, does not symlink** — edits to the repo do not propagate until you re-run `install.sh`.
 - **Hooks are chmod +x'd** after install — new hook scripts must be shell-executable.
-- **Packs install skills by directory** (`packs/<pack>/claude-code/skills/<skill>/`), and **each skill directory must contain a `SKILL.md`** or `install_pack()` silently skips it. This is the single most common reason a new skill "doesn't install."
+- **Packs install skills by directory** (`packs/<pack>/skills/<skill>/`), and **each skill directory must contain a `SKILL.md`** or `install_pack()` silently skips it. This is the single most common reason a new skill "doesn't install."
 - **`environment.d` files are skipped if the destination already exists** (never overwritten), unlike everything else.
-- `install.sh` writes `$SCRIPT_DIR/guide` to `~/.claude/claude-code-guide-path` so other tools can find the guide docs.
+- `install.sh` writes `$SCRIPT_DIR/guide` to `~/.claude/guide-path` so other tools can find the guide docs.
 
 ## Pack manifest format
 
@@ -66,22 +62,21 @@ name = "local-llm"
 description = "Route lightweight tasks to local llama-server to save API tokens"
 version = "1.0.0"
 
-[claude-code]
-skills = "claude-code/skills"
+[claude]
+skills = "skills"
 ```
 
-Note: `install.sh` **does not actually parse the manifest** beyond grepping `description` for `--list` output. Installation is driven by directory conventions (`claude-code/skills/`), not manifest declarations. The manifest is documentation for humans.
+Note: `install.sh` **does not actually parse the manifest** beyond grepping `description` for `--list` output. Installation is driven by directory conventions (`skills/`), not manifest declarations. The manifest is documentation for humans.
 
 ## Where to put what
 
 | Change                              | Edit                                                        |
 | ----------------------------------- | ----------------------------------------------------------- |
-| Global Claude Code behavior rules   | `core/claude-code/CLAUDE.md`                                |
-| Harness / permissions / hooks / MCP | `core/claude-code/settings.json`                            |
-| RTK token optimizer setup           | `core/rtk.sh` (binary install + `rtk init -g`)              |
-| A new general-purpose skill         | `core/claude-code/skills/<name>/SKILL.md` *or* a pack       |
-| A domain-specific skill             | `packs/<pack>/claude-code/skills/<name>/SKILL.md`          |
-| A new pack                          | `packs/<name>/{manifest.toml,claude-code/skills/}`          |
+| Global Claude Code behavior rules   | `core/CLAUDE.md`                                |
+| Harness / permissions / hooks / MCP | `core/settings.json`                            |
+| A new general-purpose skill         | `core/skills/<name>/SKILL.md` *or* a pack       |
+| A domain-specific skill             | `packs/<pack>/skills/<name>/SKILL.md`          |
+| A new pack                          | `packs/<name>/{manifest.toml,skills/}`          |
 | Shell env vars for the whole system | `core/environment.d/<file>.sh`                              |
 
 Prefer adding to an existing pack over creating a new one. A new pack should represent a cohesive domain (like `scientific-writing`), not a single skill.
@@ -102,5 +97,5 @@ On session end, update the same journal: check off completed todos, update statu
 
 - **Skills are directories, not single files.** A `SKILL.md` is required; `references/`, `scripts/`, and `examples/` subdirectories are conventional. See `best-practice.md` for the full pattern.
 - **Keep CLAUDE.md files short** (< 200 lines is the documented target). If rules grow, split into `.claude/rules/` or use `<important if="...">` tags.
-- **Don't dump content into `guide/` expecting it to install.** `guide/` is read-only reference material that users browse from their installed `~/.claude/claude-code-guide-path` pointer.
+- **Don't dump content into `guide/` expecting it to install.** `guide/` is read-only reference material that users browse from their installed `~/.claude/guide-path` pointer.
 - **settings.json changes are harness-level** — they affect sandbox, permissions, hooks, and plugins, which Claude cannot override at runtime. Use `settings.json` for deterministic behavior; use `CLAUDE.md` files for guidance.

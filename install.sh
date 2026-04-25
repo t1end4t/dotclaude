@@ -78,19 +78,19 @@ install_core() {
   echo ""
 
   # Claude Code
-  if [ -d "$core/claude-code" ]; then
-    echo -e "  ${CYAN}claude-code${RESET}"
-    copy_dir  "$core/claude-code/hooks"     "$CLAUDE_HOME/hooks"     "~/.claude/hooks/"
-    merge_json "$core/claude-code/settings.json" "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
-    copy_file "$core/claude-code/CLAUDE.md" "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
-    copy_file "$core/claude-code/CLAUDE-TOKEN-EFFICIENT.md" "$CLAUDE_HOME/CLAUDE-TOKEN-EFFICIENT.md" "~/.claude/CLAUDE-TOKEN-EFFICIENT.md"
+  if [ -d "$core" ]; then
+    echo -e "  ${CYAN}claude${RESET}"
+    copy_dir  "$core/hooks"     "$CLAUDE_HOME/hooks"     "~/.claude/hooks/"
+    merge_json "$core/settings.json" "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
+    copy_file "$core/CLAUDE.md" "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
+    copy_file "$core/CLAUDE-TOKEN-EFFICIENT.md" "$CLAUDE_HOME/CLAUDE-TOKEN-EFFICIENT.md" "~/.claude/CLAUDE-TOKEN-EFFICIENT.md"
     # Make hooks executable
     chmod +x "$CLAUDE_HOME/hooks/"*.sh 2>/dev/null || true
 
     # Core skills
-    if [ -d "$core/claude-code/skills" ]; then
+    if [ -d "$core/skills" ]; then
       mkdir -p "$CLAUDE_HOME/skills"
-      for skill_dir in "$core/claude-code/skills"/*/; do
+      for skill_dir in "$core/skills"/*/; do
         [ -f "$skill_dir/SKILL.md" ] || continue
         local skill_name=$(basename "$skill_dir")
         rm -rf "$CLAUDE_HOME/skills/$skill_name"
@@ -120,8 +120,8 @@ install_core() {
 
   # Guide path
   if [ -d "$SCRIPT_DIR/guide" ]; then
-    echo "$SCRIPT_DIR/guide" > "$CLAUDE_HOME/claude-code-guide-path"
-    echo -e "  ✅  ${GREEN}~/.claude/claude-code-guide-path${RESET}"
+    echo "$SCRIPT_DIR/guide" > "$CLAUDE_HOME/guide-path"
+    echo -e "  ✅  ${GREEN}~/.claude/guide-path${RESET}"
     COUNT=$((COUNT + 1))
   fi
 
@@ -159,12 +159,12 @@ install_pack() {
   [ -n "$desc" ] && echo -e "  ${DIM}$desc${RESET}"
   echo ""
 
-  echo -e "  ${CYAN}claude-code${RESET}"
+  echo -e "  ${CYAN}claude${RESET}"
 
   # Skills (use pack:skill naming so invoke is /pack:skill not /pack/skill)
-  if [ -d "$pack_dir/claude-code/skills" ]; then
+  if [ -d "$pack_dir/skills" ]; then
     mkdir -p "$CLAUDE_HOME/skills"
-    for skill_dir in "$pack_dir/claude-code/skills"/*/; do
+    for skill_dir in "$pack_dir/skills"/*/; do
       [ -d "$skill_dir" ] || continue
       local skill_name=$(basename "$skill_dir")
       [ -f "$skill_dir/SKILL.md" ] || continue
@@ -177,31 +177,19 @@ install_pack() {
   fi
 
   # Hooks
-  if [ -d "$pack_dir/claude-code/hooks" ]; then
-    copy_dir "$pack_dir/claude-code/hooks" "$CLAUDE_HOME/hooks" "~/.claude/hooks/"
+  if [ -d "$pack_dir/hooks" ]; then
+    copy_dir "$pack_dir/hooks" "$CLAUDE_HOME/hooks" "~/.claude/hooks/"
     chmod +x "$CLAUDE_HOME/hooks/"*.sh 2>/dev/null || true
   fi
 
   # Settings (merge hooks array entries)
-  if [ -f "$pack_dir/claude-code/settings.json" ]; then
-    merge_json "$pack_dir/claude-code/settings.json" "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
+  if [ -f "$pack_dir/settings.json" ]; then
+    merge_json "$pack_dir/settings.json" "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
   fi
 
   echo ""
 }
 
-# ── Install RTK ────────────────────────────────────────────────────
-install_rtk() {
-  local rtk_script="$SCRIPT_DIR/core/rtk.sh"
-  if [ ! -f "$rtk_script" ]; then
-    echo -e "  ${RED}core/rtk.sh not found${RESET}"
-    return 1
-  fi
-  echo -e "${BOLD}Setting up RTK (token optimizer)...${RESET}"
-  echo ""
-  bash "$rtk_script"
-  echo ""
-}
 
 # ── Install MCP servers ────────────────────────────────────────────
 install_mcp() {
@@ -240,14 +228,13 @@ usage() {
   echo ""
   echo "Usage:"
   echo "  ./install.sh --core                   Install Layer 0 (self-modification sandbox)"
-  echo "  ./install.sh --rtk                    Install RTK token optimizer + Claude Code hook"
   echo "  ./install.sh --mcp                    Install MCP servers (fetch, memory, filesystem)"
   echo "  ./install.sh --pack=NAME              Install a specific pack"
   echo "  ./install.sh --pack=NAME --pack=NAME  Install multiple packs"
   echo "  ./install.sh --all                    Install core + all packs + MCP servers"
   echo "  ./install.sh --list                   List available packs"
   echo ""
-  echo "Target: claude-code (~/.claude)"
+  echo "Target: claude (~/.claude)"
   echo ""
 }
 
@@ -260,7 +247,6 @@ fi
 DO_CORE=false
 DO_ALL=false
 DO_MCP=false
-DO_RTK=false
 PACKS=()
 
 while [ $# -gt 0 ]; do
@@ -273,9 +259,6 @@ while [ $# -gt 0 ]; do
       ;;
     --mcp)
       DO_MCP=true
-      ;;
-    --rtk)
-      DO_RTK=true
       ;;
     --list)
       list_packs
@@ -307,13 +290,10 @@ if $DO_ALL; then
     install_pack "$(basename "$pack_dir")"
   done
   install_mcp
-  install_rtk
 elif $DO_CORE; then
   install_core
 elif $DO_MCP; then
   install_mcp
-elif $DO_RTK; then
-  install_rtk
 fi
 
 for pack in "${PACKS[@]}"; do

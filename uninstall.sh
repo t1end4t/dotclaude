@@ -31,8 +31,8 @@ uninstall_core() {
   echo ""
 
   # Claude Code hooks
-  if [ -d "$core/claude-code/hooks" ]; then
-    for f in "$core/claude-code/hooks"/*; do
+  if [ -d "$core/hooks" ]; then
+    for f in "$core/hooks"/*; do
       [ -f "$f" ] || continue
       remove_if_exists "$CLAUDE_HOME/hooks/$(basename "$f")" "~/.claude/hooks/$(basename "$f")"
     done
@@ -40,7 +40,8 @@ uninstall_core() {
 
   remove_if_exists "$CLAUDE_HOME/settings.json" "~/.claude/settings.json"
   remove_if_exists "$CLAUDE_HOME/CLAUDE.md" "~/.claude/CLAUDE.md"
-  remove_if_exists "$CLAUDE_HOME/claude-code-guide-path" "~/.claude/claude-code-guide-path"
+  remove_if_exists "$CLAUDE_HOME/CLAUDE-TOKEN-EFFICIENT.md" "~/.claude/CLAUDE-TOKEN-EFFICIENT.md"
+  remove_if_exists "$CLAUDE_HOME/guide-path" "~/.claude/guide-path"
 
   # External submodule path pointers
   if [ -d "$SCRIPT_DIR/external" ]; then
@@ -62,8 +63,8 @@ uninstall_core() {
   fi
 
   # Claude Code core skills
-  if [ -d "$core/claude-code/skills" ]; then
-    for skill_dir in "$core/claude-code/skills"/*/; do
+  if [ -d "$core/skills" ]; then
+    for skill_dir in "$core/skills"/*/; do
       [ -d "$skill_dir" ] || continue
       local skill_name=$(basename "$skill_dir")
       remove_if_exists "$CLAUDE_HOME/skills/$skill_name" "~/.claude/skills/$skill_name/"
@@ -87,8 +88,8 @@ uninstall_pack() {
   echo ""
 
   # Claude Code skills (match pack:skill naming from install)
-  if [ -d "$pack_dir/claude-code/skills" ]; then
-    for skill_dir in "$pack_dir/claude-code/skills"/*/; do
+  if [ -d "$pack_dir/skills" ]; then
+    for skill_dir in "$pack_dir/skills"/*/; do
       [ -d "$skill_dir" ] || continue
       local skill_name=$(basename "$skill_dir")
       remove_if_exists "$CLAUDE_HOME/skills/${pack_name}:${skill_name}" "~/.claude/skills/${pack_name}:${skill_name}/"
@@ -96,8 +97,8 @@ uninstall_pack() {
   fi
 
   # Claude Code hooks
-  if [ -d "$pack_dir/claude-code/hooks" ]; then
-    for f in "$pack_dir/claude-code/hooks"/*; do
+  if [ -d "$pack_dir/hooks" ]; then
+    for f in "$pack_dir/hooks"/*; do
       [ -f "$f" ] || continue
       remove_if_exists "$CLAUDE_HOME/hooks/$(basename "$f")" "~/.claude/hooks/$(basename "$f")"
     done
@@ -106,20 +107,6 @@ uninstall_pack() {
   echo ""
 }
 
-# ── Uninstall RTK ────────────────────────────────────────────────────
-uninstall_rtk() {
-  echo -e "${BOLD}Uninstalling RTK hook...${RESET}"
-  echo ""
-  # Remove the PreToolUse rtk hook from settings.json
-  if [ -f "$CLAUDE_HOME/settings.json" ] && command -v jq &>/dev/null; then
-    cleaned=$(jq 'if .hooks.PreToolUse then .hooks.PreToolUse = [.hooks.PreToolUse[] | select(.hooks? | all(.command? // .type? | startswith("rtk") | not))] | if .hooks.PreToolUse | length == 0 then del(.hooks.PreToolUse) else . end else . end' "$CLAUDE_HOME/settings.json")
-    echo "$cleaned" > "$CLAUDE_HOME/settings.json"
-    echo -e "  🗑  ${RED}rtk PreToolUse hook${RESET}"
-    COUNT=$((COUNT + 1))
-  fi
-  echo -e "  ${DIM}Note: rtk binary not removed (managed by rtk's own installer)${RESET}"
-  echo ""
-}
 
 # ── Uninstall MCP servers ──────────────────────────────────────────
 uninstall_mcp() {
@@ -141,7 +128,6 @@ usage() {
   echo ""
   echo "Usage:"
   echo "  ./uninstall.sh --core                   Uninstall Layer 0"
-  echo "  ./uninstall.sh --rtk                    Uninstall RTK hook from Claude Code"
   echo "  ./uninstall.sh --mcp                    Uninstall MCP servers"
   echo "  ./uninstall.sh --pack=NAME              Uninstall a specific pack"
   echo "  ./uninstall.sh --all                    Uninstall core + all packs + MCP servers"
@@ -156,7 +142,6 @@ fi
 DO_CORE=false
 DO_ALL=false
 DO_MCP=false
-DO_RTK=false
 PACKS=()
 
 while [ $# -gt 0 ]; do
@@ -164,7 +149,6 @@ while [ $# -gt 0 ]; do
     --core)     DO_CORE=true ;;
     --all)      DO_ALL=true ;;
     --mcp)      DO_MCP=true ;;
-    --rtk)      DO_RTK=true ;;
     --pack=*)   PACKS+=("${1#--pack=}") ;;
     -h|--help)  usage; exit 0 ;;
     *)          echo -e "${RED}Unknown option: $1${RESET}"; usage; exit 1 ;;
@@ -181,13 +165,10 @@ if $DO_ALL; then
     uninstall_pack "$(basename "$pack_dir")"
   done
   uninstall_mcp
-  uninstall_rtk
 elif $DO_CORE; then
   uninstall_core
 elif $DO_MCP; then
   uninstall_mcp
-elif $DO_RTK; then
-  uninstall_rtk
 fi
 
 for pack in "${PACKS[@]}"; do

@@ -3,5 +3,5 @@ name = "scientific-writing"
 description = "Write, review, and format scientific manuscripts for publication"
 version = "1.0.0"
 
-[claude-code]
-skills = "claude-code/skills"
+[claude]
+skills = "skills"
